@@ -41,7 +41,7 @@ await bstream.view.update()
 await bstream.view.get(0)
 ```
 
-Bitstream lets you write concise multiwriter data structures. As an example, a multiwriter Bittree (with basic, last-one-wins conflict resolution) can be written with [~40 lines of code](examples/autobee-simple.js).
+Bitstream lets you write concise multiwriter data structures. As an example, a multiwriter Bittree (with basic, last-one-wins conflict resolution) can be written with [~40 lines of code](examples/multitree-simple.js).
 
 In addition multiwriter data structures built on Bitstream inherit the same feature set as Unichain. This means that users can securely query a multiwriter data structure built with Bitstream by only downloading a fraction of the data.
 

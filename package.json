@@ -1,7 +1,7 @@
 {
   "name": "@web4/bitstream",
-  "version": "1.0.0",
-  "description": "BitStream lets you write concise multiwriter data structures with Unichaib",
+  "version": "1.0.1",
+  "description": "BitStream lets you write concise multiwriter data structures with Unichain",
   "main": "index.js",
   "scripts": {
     "test": "standard && tape test/*.js"
