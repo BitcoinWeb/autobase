@@ -1,7 +1,7 @@
 {
-  "name": "autobase",
-  "version": "1.0.0-alpha.8",
-  "description": "Autobase lets you write concise multiwriter data structures with Hypercore",
+  "name": "@web4/bitstream",
+  "version": "1.0.0",
+  "description": "BitStream lets you write concise multiwriter data structures with Unichaib",
   "main": "index.js",
   "scripts": {
     "test": "standard && tape test/*.js"
@@ -16,9 +16,9 @@
     "streamx": "^2.10.0"
   },
   "devDependencies": {
-    "corestore": "next",
-    "hyperbee": "^1.5.3",
-    "hypercore": "next",
+    "@web4/chainstore": "next",
+    "@web4/bittree": "^1.0.0",
+    "@web4/unichain": "next",
     "latency-stream": "^1.0.0",
     "random-access-memory": "^3.1.2",
     "standard": "^16.0.3",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hypercore-protocol/autobase.git"
+    "url": "https://github.com/bitwebs/bitstream.git"
   },
   "contributors": [
     {
@@ -42,7 +42,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hypercore-protocol/autobase/issues"
+    "url": "https://github.com/bitwebs/bitstream/issues"
   },
-  "homepage": "https://github.com/hypercore-protocol/autobase"
+  "homepage": "https://github.com/bitwebs/bitstream"
 }

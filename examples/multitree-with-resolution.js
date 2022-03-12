@@ -1,30 +1,30 @@
-const Hyperbee = require('hyperbee')
+const Bittree = require('@web4/bittree')
 
 /*
- * This version of Autobee does very limited conflict resolution:
+ * This version of Multitree does very limited conflict resolution:
  * 1) It only supports put operations
  * 2) If a key has multiple conflicts, it will only show the latest one
  *
  * More sophisticated conflict resolution strategies (deletion handling) will require adding
- * additional causal metadata to each input operation at the Autobee layer.
+ * additional causal metadata to each input operation at the Multitree layer.
  *
  * As an example, each operation must "link" to any previous operation it's overwriting.
  */
-module.exports = class Autobee {
-  constructor (autobase, opts) {
-    this.autobase = autobase
-    this.autobase.start({
+module.exports = class Multitree {
+  constructor (bitstream, opts) {
+    this.bitstream = bitstream
+    this.bitstream.start({
       unwrap: true,
       apply: this._apply.bind(this)
     })
-    this.bee = new Hyperbee(this.autobase.view, {
+    this.tree = new Bittree(this.bitstream.view, {
       ...opts,
       extension: false
     })
   }
 
   ready () {
-    return this.autobase.ready()
+    return this.bitstream.ready()
   }
 
   _encode (value, change, seq) {
@@ -38,7 +38,7 @@ module.exports = class Autobee {
   async _apply (batch, clocks, change) {
     const self = this
     const localClock = clocks.local
-    const b = this.bee.batch({ update: false })
+    const b = this.tree.batch({ update: false })
 
     for (const node of batch) {
       const op = JSON.parse(node.value.toString())
@@ -67,11 +67,11 @@ module.exports = class Autobee {
 
   async put (key, value, opts) {
     const op = Buffer.from(JSON.stringify({ type: 'put', key, value }))
-    return await this.autobase.append(op, opts)
+    return await this.bitstream.append(op, opts)
   }
 
   async get (key) {
-    const node = await this.bee.get(key)
+    const node = await this.tree.get(key)
     if (!node) return null
     node.value = this._decode(node.value).value
     return node

@@ -1,44 +1,44 @@
 const test = require('tape')
 const ram = require('random-access-memory')
-const Hypercore = require('hypercore')
+const Unichain = require('@web4/unichain')
 
-const Autobase = require('..')
-const SimpleAutobee = require('../examples/autobee-simple')
-const AutobeeWithResolution = require('../examples/autobee-with-resolution')
+const Bitstream = require('..')
+const SimpleMultitree = require('../examples/multitree-simple')
+const MultitreeWithResolution = require('../examples/multitree-with-resolution')
 
-test('simple autobee', async t => {
-  const firstUser = new Hypercore(ram)
-  const firstOutput = new Hypercore(ram)
-  const secondUser = new Hypercore(ram)
-  const secondOutput = new Hypercore(ram)
+test('simple multitree', async t => {
+  const firstUser = new Unichain(ram)
+  const firstOutput = new Unichain(ram)
+  const secondUser = new Unichain(ram)
+  const secondOutput = new Unichain(ram)
 
   const inputs = [firstUser, secondUser]
 
-  const base1 = new Autobase({
+  const bstream1 = new Bitstream({
     inputs,
     localOutput: firstOutput,
     localInput: firstUser
   })
-  const base2 = new Autobase({
+  const bstream2 = new Bitstream({
     inputs,
     localOutput: secondOutput,
     localInput: secondUser
   })
-  const base3 = new Autobase({
+  const bstream3 = new Bitstream({
     inputs,
     outputs: [firstOutput, secondOutput]
   })
 
-  const writer1 = new SimpleAutobee(base1, {
+  const writer1 = new SimpleMultitree(bstream1, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
-  const writer2 = new SimpleAutobee(base2, {
+  const writer2 = new SimpleMultitree(bstream2, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
   // Simulates a remote reader (not part of the group).
-  const reader = new SimpleAutobee(base3, {
+  const reader = new SimpleMultitree(bstream3, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
@@ -74,38 +74,38 @@ test('simple autobee', async t => {
   t.end()
 })
 
-test('autobee with basic conflict resolution (only handles puts)', async t => {
-  const firstUser = new Hypercore(ram)
-  const firstOutput = new Hypercore(ram)
-  const secondUser = new Hypercore(ram)
-  const secondOutput = new Hypercore(ram)
+test('multitree with basic conflict resolution (only handles puts)', async t => {
+  const firstUser = new Unichain(ram)
+  const firstOutput = new Unichain(ram)
+  const secondUser = new Unichain(ram)
+  const secondOutput = new Unichain(ram)
 
   const inputs = [firstUser, secondUser]
 
-  const base1 = new Autobase({
+  const bstream1 = new Bitstream({
     inputs,
     localOutput: firstOutput,
     localInput: firstUser
   })
-  const base2 = new Autobase({
+  const bstream2 = new Bitstream({
     inputs,
     localOutput: secondOutput,
     localInput: secondUser
   })
 
-  const writer1 = new AutobeeWithResolution(base1, {
+  const writer1 = new MultitreeWithResolution(bstream1, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
-  const writer2 = new AutobeeWithResolution(base2, {
+  const writer2 = new MultitreeWithResolution(bstream2, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
 
   // Create two forking writes to 'a'
   await writer1.put('a', 'a', []) // [] means empty clock
-  await writer1.put('b', 'b', []) // Two appends will shift writer1 to the back of the rebased index.
-  await writer1.put('c', 'c', []) // Two appends will shift writer1 to the back of the rebased index.
+  await writer1.put('b', 'b', []) // Two appends will shift writer1 to the back of the rebstreamd index.
+  await writer1.put('c', 'c', []) // Two appends will shift writer1 to the back of the rebstreamd index.
   await writer2.put('a', 'a*', [])
 
   {
@@ -139,49 +139,49 @@ test('autobee with basic conflict resolution (only handles puts)', async t => {
 })
 
 /*
-// TODO: Wrap Hyperbee extension to get this working
-test.skip('autobee extension', async t => {
+// TODO: Wrap Bittree extension to get this working
+test.skip('multitree extension', async t => {
   const NUM_RECORDS = 5
 
-  const store1 = await Corestore.fromStorage(ram)
-  const store2 = await Corestore.fromStorage(ram)
-  const store3 = await Corestore.fromStorage(ram)
-  // Replicate both corestores
+  const store1 = await Chainstore.fromStorage(ram)
+  const store2 = await Chainstore.fromStorage(ram)
+  const store3 = await Chainstore.fromStorage(ram)
+  // Replicate both chainstores
   replicateWithLatency(store1, store2)
   replicateWithLatency(store1, store3)
 
-  const { user: firstUser } = await Autobase.createUser(store1)
+  const { user: firstUser } = await Bitstream.createUser(store1)
   const manifest = [firstUser]
 
-  const bee1 = new Autobee(store1, manifest, firstUser, {
+  const tree1 = new Multitree(store1, manifest, firstUser, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
-  const bee2 = new Autobee(store2, Manifest.deflate(manifest), null, {
+  const tree2 = new Multitree(store2, Manifest.deflate(manifest), null, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8'
   })
-  const bee3 = new Autobee(store3, Manifest.deflate(manifest), null, {
+  const tree3 = new Multitree(store3, Manifest.deflate(manifest), null, {
     keyEncoding: 'utf-8',
     valueEncoding: 'utf-8',
     extension: false
   })
 
   for (let i = 0; i < NUM_RECORDS; i++) {
-    await bee1.put('' + i, '' + i)
+    await tree1.put('' + i, '' + i)
   }
-  await bee1.refresh()
+  await tree1.refresh()
 
   console.log('after put')
   await new Promise(resolve => setTimeout(resolve, 1000))
 
-  console.log(await collect(bee2.createReadStream()))
+  console.log(await collect(tree2.createReadStream()))
 
   const t0 = process.hrtime()
-  const first = await collect(bee2.createReadStream())
+  const first = await collect(tree2.createReadStream())
   const t1 = process.hrtime(t0)
 
-  const second = await collect(bee3.createReadStream())
+  const second = await collect(tree3.createReadStream())
   const t2 = process.hrtime(t0)
 
   t.same(first.length, NUM_RECORDS)

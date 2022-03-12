@@ -1,36 +1,36 @@
 const test = require('tape')
-const Hypercore = require('hypercore')
+const Unichain = require('@web4/unichain')
 const ram = require('random-access-memory')
 
 const { bufferize, causalValues } = require('./helpers')
-const Autobase = require('../')
+const Bitstream = require('../')
 
 test('batches array-valued appends using partial input nodes', async t => {
-  const writerA = new Hypercore(ram)
-  const writerB = new Hypercore(ram)
-  const writerC = new Hypercore(ram)
+  const writerA = new Unichain(ram)
+  const writerB = new Unichain(ram)
+  const writerC = new Unichain(ram)
 
-  const base = new Autobase({
+  const bstream = new Bitstream({
     inputs: [writerA, writerB, writerC]
   })
 
   // Create three dependent forks
-  await base.append(['a0'], await base.latest(writerA), writerA)
-  await base.append(['b0', 'b1'], await base.latest(writerA), writerB)
-  await base.append(['c0', 'c1', 'c2'], await base.latest(writerA), writerC)
+  await bstream.append(['a0'], await bstream.latest(writerA), writerA)
+  await bstream.append(['b0', 'b1'], await bstream.latest(writerA), writerB)
+  await bstream.append(['c0', 'c1', 'c2'], await bstream.latest(writerA), writerC)
 
   {
-    const output = await causalValues(base)
+    const output = await causalValues(bstream)
     t.same(output.map(v => v.value), bufferize(['b1', 'b0', 'c2', 'c1', 'c0', 'a0']))
   }
 
   // Add 4 more records to A -- should switch fork ordering
   for (let i = 1; i < 5; i++) {
-    await base.append(`a${i}`, await base.latest(writerA), writerA)
+    await bstream.append(`a${i}`, await bstream.latest(writerA), writerA)
   }
 
   {
-    const output = await causalValues(base)
+    const output = await causalValues(bstream)
     t.same(output.map(v => v.value), bufferize(['b1', 'b0', 'c2', 'c1', 'c0', 'a4', 'a3', 'a2', 'a1', 'a0']))
   }
 

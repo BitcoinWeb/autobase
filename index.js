@@ -13,10 +13,10 @@ const KeyCompressor = require('./lib/compression')
 const { InputNode, OutputNode } = require('./lib/nodes')
 const { Node: NodeSchema, decodeHeader } = require('./lib/nodes/messages')
 
-const INPUT_PROTOCOL = '@autobase/input/v1'
-const OUTPUT_PROTOCOL = '@autobase/output/v1'
+const INPUT_PROTOCOL = '@bitstream/input/v1'
+const OUTPUT_PROTOCOL = '@bitstream/output/v1'
 
-module.exports = class Autobase extends EventEmitter {
+module.exports = class Bitstream extends EventEmitter {
   constructor ({ inputs, outputs, localInput, localOutput, apply, unwrap, autostart } = {}) {
     super()
     this.localInput = localInput
@@ -127,7 +127,7 @@ module.exports = class Autobase extends EventEmitter {
 
   _validateInput (input) {
     if (input.valueEncoding && input.valueEncoding !== codecs.binary) {
-      throw new Error('Hypercore inputs must be binary ones')
+      throw new Error('Unichain inputs must be binary ones')
     }
   }
 
@@ -219,7 +219,7 @@ module.exports = class Autobase extends EventEmitter {
     const clock = new Map()
     for (const input of inputs) {
       const id = b.toString(input.key, 'hex')
-      if (!this._inputsByKey.has(id)) throw new Error('Hypercore is not an input of the Autobase')
+      if (!this._inputsByKey.has(id)) throw new Error('Unichain is not an input of the Bitstream')
       if (input.length === 0) continue
       clock.set(id, input.length - 1)
     }
@@ -515,10 +515,10 @@ module.exports = class Autobase extends EventEmitter {
     this.closed = true
   }
 
-  static async isAutobase (core) {
-    if (core.length === 0) return false
+  static async isBitstream (chain) {
+    if (chain.length === 0) return false
     try {
-      const block = await core.get(0, { valueEncoding: 'binary' })
+      const block = await chain.get(0, { valueEncoding: 'binary' })
       const header = decodeHeader(block)
       const protocol = header && header.protocol
       return !!protocol && (protocol === INPUT_PROTOCOL || protocol === OUTPUT_PROTOCOL)
