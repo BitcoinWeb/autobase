@@ -1,5 +1,5 @@
 const test = require('tape')
-const Unichain = require('@web4/umichain')
+const Unichain = require('@web4/unichain')
 const ram = require('random-access-memory')
 
 const { bufferize, linearizedValues } = require('./helpers')
